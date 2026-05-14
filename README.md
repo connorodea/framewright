@@ -108,6 +108,7 @@ fw clone https://aiwholesail.com --duration 25 --out ./demo.mp4
 | `fw list` (`ls`) | List scenes. `--json` dumps the full project file |
 | `fw add <kind>` | Append a scene. Flags: `--text`, `--url`, `--image`, `--duration`, `--voice` |
 | `fw script <topic>` | Claude Code → multi-scene script. Flags: `--tone`, `--duration`, `--append`, `--json` |
+| `fw theme <vibe>` | Ask Claude Code to design a brand palette and font pairing for the active project (persisted in `framewright.json`, applied to the composition automatically). Flags: `--json` |
 | `fw preview` | Open the HyperFrames preview window |
 | `fw render` | Render to file. Flags: `--format mp4\|webm\|gif`, `--out <path>` |
 | `fw clone <url>` | One-shot website → video pipeline |

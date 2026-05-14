@@ -1,5 +1,5 @@
 import { execa, type ExecaError } from 'execa';
-import type { FramewrightProject } from './project.js';
+import type { FramewrightProject, Theme } from './project.js';
 
 // Resolves the `claude` (Claude Code) CLI. Override with FRAMEWRIGHT_CLAUDE_BIN.
 function claudeBin(): { command: string; baseArgs: string[] } {
@@ -184,9 +184,13 @@ export async function generateVoiceoverViaSkill(opts: {
   };
 }
 
-function parseScriptFromClaudeOutput(raw: string): GeneratedScript {
-  // claude -p --output-format json wraps the result. Try parsing it as the
-  // wrapper first, then fall back to treating raw as the script JSON.
+/**
+ * Parse JSON output from `claude -p --output-format json`. Claude wraps the
+ * actual model output in `{ result: "..." }`; this helper unwraps it, strips
+ * any accidental code-fences, JSON.parses, then runs the caller-supplied
+ * validator. Validator should throw with a friendly message on shape errors.
+ */
+export function parseClaudeJson<T>(raw: string, validate: (parsed: unknown) => T): T {
   let candidate = raw.trim();
   try {
     const wrapper = JSON.parse(candidate) as { result?: string } | unknown;
@@ -203,18 +207,109 @@ function parseScriptFromClaudeOutput(raw: string): GeneratedScript {
   }
   candidate = stripCodeFence(candidate);
   const parsed = JSON.parse(candidate) as unknown;
-  if (
-    !parsed ||
-    typeof parsed !== 'object' ||
-    !Array.isArray((parsed as GeneratedScript).scenes)
-  ) {
-    throw new Error('Claude did not return a script with a "scenes" array.');
-  }
-  return parsed as GeneratedScript;
+  return validate(parsed);
+}
+
+function parseScriptFromClaudeOutput(raw: string): GeneratedScript {
+  return parseClaudeJson(raw, (parsed) => {
+    if (
+      !parsed ||
+      typeof parsed !== 'object' ||
+      !Array.isArray((parsed as GeneratedScript).scenes)
+    ) {
+      throw new Error('Claude did not return a script with a "scenes" array.');
+    }
+    return parsed as GeneratedScript;
+  });
 }
 
 function stripCodeFence(text: string): string {
   const fence = /^```(?:json)?\s*([\s\S]*?)```\s*$/m;
   const m = text.match(fence);
   return (m ? m[1] : text).trim();
+}
+
+const THEME_INSTRUCTIONS = `You are designing a brand color palette and font pairing for a short-form social video.
+Return JSON ONLY matching this schema. No prose. No code fences.
+{
+  "background": "#0b0b10",
+  "surface": "#15151d",
+  "textPrimary": "#ffffff",
+  "textSecondary": "#a3a3b2",
+  "accent": "#7c5cff",
+  "accentContrast": "#0b0b10",
+  "fontDisplay": "\\"Inter\\", system-ui, -apple-system, sans-serif",
+  "fontBody": "\\"Inter\\", system-ui, -apple-system, sans-serif"
+}
+Rules:
+- Pick colors that work for short-form social video — high contrast, readable at 1080p.
+- background should be the darkest (or lightest, if pale theme) base; surface is slightly offset for cards.
+- textPrimary must have strong contrast against background (WCAG AA+).
+- accent is the brand pop color; accentContrast must be readable when placed on accent.
+- Font stacks must be valid CSS, include safe system fallbacks, and end in a generic family (sans-serif / serif).
+- Use web-safe fonts or popular Google Fonts (Inter, Plus Jakarta Sans, Manrope, Space Grotesk, IBM Plex Sans, Playfair Display, Outfit, etc.).
+- Output JSON only.`;
+
+export async function generateTheme(opts: {
+  vibe: string;
+  project: FramewrightProject;
+  cwd: string;
+}): Promise<Theme> {
+  const prompt = [
+    THEME_INSTRUCTIONS,
+    '',
+    `Vibe: ${opts.vibe}`,
+    `Project: ${opts.project.name}`,
+    `Canvas: ${opts.project.width}x${opts.project.height} @ ${opts.project.fps}fps`,
+    '',
+    'Output JSON only.',
+  ].join('\n');
+
+  const { stdout, exitCode, stderr } = await runClaude({
+    prompt,
+    cwd: opts.cwd,
+    outputFormat: 'json',
+    permissionMode: 'bypassPermissions',
+  });
+  if (exitCode !== 0) {
+    throw new Error(`claude exited ${exitCode}: ${stderr || stdout}`);
+  }
+
+  const required = [
+    'background',
+    'surface',
+    'textPrimary',
+    'textSecondary',
+    'accent',
+    'accentContrast',
+    'fontDisplay',
+    'fontBody',
+  ] as const;
+
+  const partial = parseClaudeJson<Partial<Theme>>(stdout, (parsed) => {
+    if (!parsed || typeof parsed !== 'object') {
+      throw new Error('Claude did not return a JSON object for the theme.');
+    }
+    const obj = parsed as Record<string, unknown>;
+    const missing = required.filter((k) => typeof obj[k] !== 'string' || !(obj[k] as string).trim());
+    if (missing.length > 0) {
+      throw new Error(
+        `Claude theme JSON missing required string field(s): ${missing.join(', ')}`,
+      );
+    }
+    return obj as Partial<Theme>;
+  });
+
+  return {
+    vibe: opts.vibe,
+    background: partial.background!,
+    surface: partial.surface!,
+    textPrimary: partial.textPrimary!,
+    textSecondary: partial.textSecondary!,
+    accent: partial.accent!,
+    accentContrast: partial.accentContrast!,
+    fontDisplay: partial.fontDisplay!,
+    fontBody: partial.fontBody!,
+    generatedAt: new Date().toISOString(),
+  };
 }

@@ -11,6 +11,7 @@ import {
   headlessPreview,
   headlessRender,
   headlessScript,
+  headlessTheme,
 } from './headless.js';
 
 const require = createRequire(import.meta.url);
@@ -71,6 +72,14 @@ program
   .option('--json', 'print the raw script JSON')
   .action(async (topic, opts) => {
     await headlessScript(topic, opts, process.cwd());
+  });
+
+program
+  .command('theme <vibe>')
+  .description('Ask Claude Code to design a brand palette + font pairing')
+  .option('--json', 'print the resolved theme JSON')
+  .action(async (vibe, opts) => {
+    await headlessTheme(vibe, opts, process.cwd());
   });
 
 program

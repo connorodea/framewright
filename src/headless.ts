@@ -23,6 +23,7 @@ import {
 import {
   captureWebsiteViaSkill,
   generateScript,
+  generateTheme,
   hasClaudeCode,
 } from './lib/claude.js';
 
@@ -208,6 +209,42 @@ export async function headlessScript(topic: string, opts: ScriptOpts, cwd: strin
   for (const s of script.scenes) {
     log(`${color.cyan(s.kind.padEnd(9))} ${(s.durationMs / 1000).toFixed(1)}s  ${s.text}`);
   }
+}
+
+// ---------------------------------------------------------------- fw theme
+
+export interface ThemeOpts {
+  json?: boolean;
+}
+
+export async function headlessTheme(vibe: string, opts: ThemeOpts, cwd: string): Promise<void> {
+  if (!(await hasClaudeCode())) die('claude CLI not found on PATH');
+  const { dir, project } = await resolveProject(cwd);
+  if (!vibe || !vibe.trim()) die('vibe descriptor required (e.g. "sleek dark crypto")');
+
+  const theme = await generateTheme({
+    vibe: vibe.trim(),
+    project,
+    cwd: dir,
+  });
+
+  project.theme = theme;
+  await saveProject(dir, project);
+  await ensureHyperframesScaffold(project, dir);
+
+  if (opts.json) {
+    process.stdout.write(JSON.stringify(theme, null, 2) + '\n');
+    return;
+  }
+  log(`${color.green('theme')}  ${color.dim(`vibe: ${theme.vibe}`)}`);
+  log(`  background       ${theme.background}`);
+  log(`  surface          ${theme.surface}`);
+  log(`  text primary     ${theme.textPrimary}`);
+  log(`  text secondary   ${theme.textSecondary}`);
+  log(`  accent           ${theme.accent}`);
+  log(`  accent contrast  ${theme.accentContrast}`);
+  log(`  font display     ${theme.fontDisplay}`);
+  log(`  font body        ${theme.fontBody}`);
 }
 
 // ---------------------------------------------------------------- fw preview
