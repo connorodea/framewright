@@ -21,6 +21,19 @@ export interface Scene {
   notes?: string;
 }
 
+export interface Theme {
+  vibe: string;
+  background: string;
+  surface: string;
+  textPrimary: string;
+  textSecondary: string;
+  accent: string;
+  accentContrast: string;
+  fontDisplay: string;
+  fontBody: string;
+  generatedAt: string;
+}
+
 export interface FramewrightProject {
   name: string;
   slug: string;
@@ -31,6 +44,7 @@ export interface FramewrightProject {
   scenes: Scene[];
   voiceDefault?: string;
   hyperframesProjectDir?: string;
+  theme?: Theme;
 }
 
 const FILE_NAME = 'framewright.json';

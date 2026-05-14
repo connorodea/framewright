@@ -16,6 +16,7 @@ import { cmdPreview } from './commands/preview.js';
 import { cmdRender } from './commands/render.js';
 import { cmdCaptureWebsite } from './commands/captureWebsite.js';
 import { cmdGenerateVoiceover } from './commands/generateVoiceover.js';
+import { cmdTheme } from './commands/theme.js';
 
 type Action =
   | 'new'
@@ -24,6 +25,7 @@ type Action =
   | 'capture'
   | 'script'
   | 'voiceover'
+  | 'theme'
   | 'remove'
   | 'preview'
   | 'render'
@@ -63,6 +65,7 @@ export async function runInteractive(): Promise<void> {
             { value: 'script', label: 'Generate script with Claude Code' },
             { value: 'capture', label: 'Add website capture (via skill)' },
             { value: 'voiceover', label: 'Generate kokoro voiceover (via skill)' },
+            { value: 'theme', label: 'Set theme (Claude Code picks brand palette)' },
             { value: 'remove', label: 'Remove a scene' },
             { value: 'preview', label: 'Preview composition' },
             { value: 'render', label: 'Render to file' },
@@ -101,6 +104,9 @@ export async function runInteractive(): Promise<void> {
           break;
         case 'voiceover':
           await cmdGenerateVoiceover(activeDir!);
+          break;
+        case 'theme':
+          await cmdTheme(activeDir!);
           break;
         case 'remove':
           await cmdRemoveScene(activeDir!);

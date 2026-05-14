@@ -54,24 +54,34 @@ export function buildCompositionHtml(project: FramewrightProject): string {
   const sceneMarkup = project.scenes
     .map((s, i) => sceneToHtml(s, i, project))
     .join('\n');
+  const themeStyle = buildThemeStyle(project);
 
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <title>${escapeHtml(project.name)}</title>
-<style>
+${themeStyle}<style>
   :root { color-scheme: dark; }
-  html, body { margin: 0; padding: 0; background: #0b0b10; color: #fff;
-    font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif; }
-  .stage { position: relative; width: ${project.width}px; height: ${project.height}px; overflow: hidden; }
+  html, body { margin: 0; padding: 0;
+    background: var(--fw-bg, #0b0b10);
+    color: var(--fw-text-primary, #fff);
+    font-family: var(--fw-font-body, -apple-system, BlinkMacSystemFont, "Inter", sans-serif); }
+  .stage { position: relative; width: ${project.width}px; height: ${project.height}px; overflow: hidden;
+    background: var(--fw-bg, #0b0b10); }
   .scene { position: absolute; inset: 0; display: flex; align-items: center;
-    justify-content: center; opacity: 0; }
+    justify-content: center; opacity: 0;
+    color: var(--fw-text-primary, #fff); }
   .scene.active { opacity: 1; }
   .scene .text { font-size: 64px; font-weight: 700; text-align: center;
-    max-width: 80%; line-height: 1.1; }
-  .scene.caption .text { font-size: 48px; }
-  .scene.voiceover .text { font-size: 36px; opacity: 0.85; }
+    max-width: 80%; line-height: 1.1;
+    font-family: var(--fw-font-display, -apple-system, BlinkMacSystemFont, "Inter", sans-serif); }
+  .scene.title .text { color: var(--fw-accent, inherit); }
+  .scene.caption .text { font-size: 48px;
+    font-family: var(--fw-font-body, -apple-system, BlinkMacSystemFont, "Inter", sans-serif); }
+  .scene.voiceover .text { font-size: 36px; opacity: 0.85;
+    color: var(--fw-text-secondary, #fff);
+    font-family: var(--fw-font-body, -apple-system, BlinkMacSystemFont, "Inter", sans-serif); }
 </style>
 </head>
 <body>
@@ -119,4 +129,34 @@ function escapeHtml(s: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+/**
+ * Sanitize a CSS value (color or font stack) for inline injection into a
+ * `:root { --x: ... }` block. Strips anything that could break out of the
+ * declaration: `{`, `}`, `;`, `<`, and stray newlines. Keeps quotes and commas
+ * so font stacks like `"Inter", sans-serif` survive intact.
+ */
+function sanitizeCssValue(raw: string): string {
+  return String(raw)
+    .replace(/[{};<>]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function buildThemeStyle(project: FramewrightProject): string {
+  const t = project.theme;
+  if (!t) return '';
+  const decls: Array<[string, string]> = [
+    ['--fw-bg', t.background],
+    ['--fw-surface', t.surface],
+    ['--fw-text-primary', t.textPrimary],
+    ['--fw-text-secondary', t.textSecondary],
+    ['--fw-accent', t.accent],
+    ['--fw-accent-contrast', t.accentContrast],
+    ['--fw-font-display', t.fontDisplay],
+    ['--fw-font-body', t.fontBody],
+  ];
+  const body = decls.map(([k, v]) => `  ${k}: ${sanitizeCssValue(v)};`).join('\n');
+  return `<style>\n:root {\n${body}\n}\n</style>\n`;
 }
