@@ -12,6 +12,31 @@ function bin(): { command: string; baseArgs: string[] } {
   return { command: 'npx', baseArgs: ['--yes', 'hyperframes'] };
 }
 
+/**
+ * Startup-time probe for hyperframes availability.
+ *
+ * Runs the resolved hyperframes binary with `--version` in pipe mode and treats
+ * either a clean exitCode 0 OR a parseable version string in stdout/stderr as
+ * success. Hyperframes (and its npx bootstrapper) may print to stderr, so we
+ * tolerate that. Any thrown error (ENOENT, missing npx, etc.) is treated as
+ * "not available".
+ */
+export async function hasHyperframes(): Promise<boolean> {
+  const { command, baseArgs } = bin();
+  try {
+    const result = await execa(command, [...baseArgs, '--version'], {
+      stdio: 'pipe',
+      env: process.env,
+      reject: false,
+    });
+    if (result.exitCode === 0) return true;
+    const combined = `${result.stdout ?? ''}\n${result.stderr ?? ''}`;
+    return /\b\d+\.\d+\.\d+/.test(combined);
+  } catch {
+    return false;
+  }
+}
+
 export async function runHyperframes(
   args: string[],
   cwd: string,

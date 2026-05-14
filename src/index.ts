@@ -12,6 +12,7 @@ import {
   headlessRender,
   headlessScript,
 } from './headless.js';
+import { preflight } from './lib/preflight.js';
 
 const require = createRequire(import.meta.url);
 const pkg = require('../package.json') as { version: string };
@@ -70,6 +71,7 @@ program
   .option('--append', 'append to existing scenes instead of replacing')
   .option('--json', 'print the raw script JSON')
   .action(async (topic, opts) => {
+    await preflight({ needsClaude: true });
     await headlessScript(topic, opts, process.cwd());
   });
 
@@ -77,6 +79,7 @@ program
   .command('preview')
   .description('Open the HyperFrames preview window')
   .action(async () => {
+    await preflight({ needsHyperframes: true });
     await headlessPreview(process.cwd());
   });
 
@@ -86,6 +89,7 @@ program
   .option('--format <fmt>', 'output format: mp4 | webm | gif', 'mp4')
   .option('--out <path>', 'output file path')
   .action(async (opts) => {
+    await preflight({ needsHyperframes: true });
     await headlessRender(opts, process.cwd());
   });
 
@@ -99,6 +103,7 @@ program
   .option('--name <name>', 'project name (default: derived from hostname + date)')
   .option('--no-render', 'stop after scaffolding + capture; skip the render step')
   .action(async (url, opts) => {
+    await preflight({ needsClaude: true, needsHyperframes: true });
     await headlessClone(url, opts, process.cwd());
   });
 
