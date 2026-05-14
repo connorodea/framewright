@@ -1,138 +1,115 @@
 #!/usr/bin/env node
-import * as p from '@clack/prompts';
+import { Command } from 'commander';
 import color from 'picocolors';
-import { join } from 'node:path';
-import { printBanner } from './banner.js';
+import { createRequire } from 'node:module';
+import { runInteractive } from './interactive.js';
 import {
-  exists,
-  loadProject,
-  projectPath,
-  totalDurationMs,
-} from './lib/project.js';
-import { cmdNew } from './commands/newProject.js';
-import { cmdAddScene } from './commands/addScene.js';
-import { cmdGenerateScript } from './commands/generateScript.js';
-import { cmdListScenes } from './commands/listScenes.js';
-import { cmdRemoveScene } from './commands/removeScene.js';
-import { cmdPreview } from './commands/preview.js';
-import { cmdRender } from './commands/render.js';
-import { cmdCaptureWebsite } from './commands/captureWebsite.js';
-import { cmdGenerateVoiceover } from './commands/generateVoiceover.js';
+  headlessAdd,
+  headlessClone,
+  headlessList,
+  headlessNew,
+  headlessPreview,
+  headlessRender,
+  headlessScript,
+} from './headless.js';
 
-type Action =
-  | 'new'
-  | 'list'
-  | 'add'
-  | 'capture'
-  | 'script'
-  | 'voiceover'
-  | 'remove'
-  | 'preview'
-  | 'render'
-  | 'quit';
+const require = createRequire(import.meta.url);
+const pkg = require('../package.json') as { version: string };
 
-async function main(): Promise<void> {
-  printBanner();
-  p.intro(color.bgMagenta(color.black(' framewright ')));
+const program = new Command()
+  .name('framewright')
+  .description('Interactive CLI for crafting AI videos with Claude Code + HyperFrames.')
+  .version(pkg.version, '-v, --version', 'print version');
 
-  const cwd = process.cwd();
-  let activeDir = (await exists(projectPath(cwd))) ? cwd : null;
+// Interactive menu — default when no subcommand is given.
+program
+  .command('menu', { isDefault: true, hidden: true })
+  .description('Open the interactive menu (default)')
+  .action(async () => {
+    await runInteractive();
+  });
 
-  while (true) {
-    if (activeDir) {
-      try {
-        const project = await loadProject(activeDir);
-        const totalSec = (totalDurationMs(project) / 1000).toFixed(1);
-        p.log.info(
-          `${color.cyan(project.name)}  ${color.dim(`${project.width}x${project.height} @ ${project.fps}fps · ${project.scenes.length} scene(s) · ${totalSec}s`)}`,
-        );
-      } catch (err) {
-        p.log.warn(
-          `Couldn't read project: ${err instanceof Error ? err.message : String(err)}`,
-        );
-        activeDir = null;
-      }
-    } else {
-      p.log.info(color.dim(`No framewright project in ${cwd}`));
-    }
+program
+  .command('new <name>')
+  .description('Create a new framewright project in cwd')
+  .option('--preset <preset>', 'canvas preset: vertical | landscape | square | 720p')
+  .option('--width <px>', 'custom canvas width')
+  .option('--height <px>', 'custom canvas height')
+  .option('--fps <n>', 'framerate', '30')
+  .option('--force', 'overwrite an existing project at the same slug')
+  .action(async (name, opts) => {
+    await headlessNew(name, opts, process.cwd());
+  });
 
-    const action = await p.select<Action>({
-      message: 'What now?',
-      options: activeDir
-        ? [
-            { value: 'list', label: 'List scenes' },
-            { value: 'add', label: 'Add scene manually' },
-            { value: 'script', label: 'Generate script with Claude Code' },
-            { value: 'capture', label: 'Add website capture (via skill)' },
-            { value: 'voiceover', label: 'Generate kokoro voiceover (via skill)' },
-            { value: 'remove', label: 'Remove a scene' },
-            { value: 'preview', label: 'Preview composition' },
-            { value: 'render', label: 'Render to file' },
-            { value: 'new', label: 'New project (different directory)' },
-            { value: 'quit', label: 'Quit' },
-          ]
-        : [
-            { value: 'new', label: 'New project' },
-            { value: 'quit', label: 'Quit' },
-          ],
-    });
+program
+  .command('list')
+  .alias('ls')
+  .description('List scenes in the current project')
+  .option('--json', 'print the full project JSON')
+  .action(async (opts) => {
+    await headlessList(opts, process.cwd());
+  });
 
-    if (p.isCancel(action) || action === 'quit') {
-      p.outro(color.dim('Bye.'));
-      return;
-    }
+program
+  .command('add <kind>')
+  .description('Add a scene (title|caption|voiceover|website-capture|image|custom)')
+  .option('--text <text>', 'scene text (for title/caption/voiceover/custom)')
+  .option('--url <url>', 'URL (for website-capture)')
+  .option('--image <path>', 'image path (for image kind)')
+  .option('--duration <sec>', 'scene duration in seconds', '3')
+  .option('--voice <name>', 'voice id for voiceover (e.g. af_bella)')
+  .action(async (kind, opts) => {
+    await headlessAdd(kind, opts, process.cwd());
+  });
 
-    try {
-      switch (action) {
-        case 'new': {
-          const created = await cmdNew(cwd);
-          if (created) activeDir = created;
-          break;
-        }
-        case 'list':
-          await cmdListScenes(activeDir!);
-          break;
-        case 'add':
-          await cmdAddScene(activeDir!);
-          break;
-        case 'script':
-          await cmdGenerateScript(activeDir!);
-          break;
-        case 'capture':
-          await cmdCaptureWebsite(activeDir!);
-          break;
-        case 'voiceover':
-          await cmdGenerateVoiceover(activeDir!);
-          break;
-        case 'remove':
-          await cmdRemoveScene(activeDir!);
-          break;
-        case 'preview':
-          await cmdPreview(activeDir!);
-          break;
-        case 'render':
-          await cmdRender(activeDir!);
-          break;
-      }
-    } catch (err) {
-      p.log.error(
-        `${color.red('Command failed:')} ${err instanceof Error ? err.message : String(err)}`,
-      );
-    }
-  }
-}
+program
+  .command('script <topic>')
+  .description('Generate a multi-scene script with Claude Code')
+  .option('--tone <tone>', 'tone descriptor', 'punchy founder')
+  .option('--duration <sec>', 'target total duration in seconds', '20')
+  .option('--append', 'append to existing scenes instead of replacing')
+  .option('--json', 'print the raw script JSON')
+  .action(async (topic, opts) => {
+    await headlessScript(topic, opts, process.cwd());
+  });
+
+program
+  .command('preview')
+  .description('Open the HyperFrames preview window')
+  .action(async () => {
+    await headlessPreview(process.cwd());
+  });
+
+program
+  .command('render')
+  .description('Render the current project to a video file')
+  .option('--format <fmt>', 'output format: mp4 | webm | gif', 'mp4')
+  .option('--out <path>', 'output file path')
+  .action(async (opts) => {
+    await headlessRender(opts, process.cwd());
+  });
+
+program
+  .command('clone <url>')
+  .description('One-shot: turn a website URL into a finished video (via skills)')
+  .option('--duration <sec>', 'target total duration', '20')
+  .option('--tone <tone>', 'script tone', 'punchy founder')
+  .option('--format <fmt>', 'output format: mp4 | webm | gif', 'mp4')
+  .option('--out <path>', 'output file path')
+  .option('--name <name>', 'project name (default: derived from hostname + date)')
+  .option('--no-render', 'stop after scaffolding + capture; skip the render step')
+  .action(async (url, opts) => {
+    await headlessClone(url, opts, process.cwd());
+  });
 
 process.on('SIGINT', () => {
-  console.log('\n' + color.dim('Interrupted.'));
+  process.stderr.write('\n' + color.dim('interrupted.\n'));
   process.exit(130);
 });
 
-main().catch((err) => {
-  console.error(color.red('Fatal:'), err);
+program.parseAsync(process.argv).catch((err) => {
+  process.stderr.write(
+    color.red('fatal: ') + (err instanceof Error ? err.message : String(err)) + '\n',
+  );
   process.exit(1);
 });
-
-// Help the bundler keep this for the bin entry.
-export {};
-// silence unused-import lint when path is helpful
-void join;

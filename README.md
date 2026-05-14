@@ -63,6 +63,8 @@ Optional env overrides (copy `.env.example` → `.env` if you want them):
 
 ## Usage
 
+### Interactive mode (default)
+
 ```bash
 cd ~/videos
 framewright          # or `fw`
@@ -77,6 +79,39 @@ Inside the prompt menu:
 5. **Generate kokoro voiceover** — fires the `hyperframes-media` skill via Claude Code.
 6. **Preview** — opens a HyperFrames preview window.
 7. **Render** — outputs an mp4 / webm / gif into `./renders/`.
+
+### Non-interactive (scriptable) mode
+
+Every action is also a subcommand — pipe-friendly, exit-code-honest, JSON-ready:
+
+```bash
+fw new launch-promo --preset vertical --fps 30
+cd launch-promo
+fw script "30-second teaser for AIWholesail" --tone "punchy founder" --duration 25
+fw add caption --text "Off-market deals, daily" --duration 2.5
+fw list
+fw render --format mp4 --out ../launch-promo.mp4
+```
+
+The hero one-liner — website to finished video, end to end:
+
+```bash
+fw clone https://aiwholesail.com --duration 25 --out ./demo.mp4
+```
+
+`fw clone` scaffolds a project, calls Claude Code for a script, invokes the
+`website-to-hyperframes` skill to capture the live site, and renders the result.
+
+| Subcommand | What it does |
+|---|---|
+| `fw new <name>` | Scaffold a project. Flags: `--preset`, `--width`, `--height`, `--fps`, `--force` |
+| `fw list` (`ls`) | List scenes. `--json` dumps the full project file |
+| `fw add <kind>` | Append a scene. Flags: `--text`, `--url`, `--image`, `--duration`, `--voice` |
+| `fw script <topic>` | Claude Code → multi-scene script. Flags: `--tone`, `--duration`, `--append`, `--json` |
+| `fw preview` | Open the HyperFrames preview window |
+| `fw render` | Render to file. Flags: `--format mp4\|webm\|gif`, `--out <path>` |
+| `fw clone <url>` | One-shot website → video pipeline |
+| `fw --version` / `fw --help` | Standard hygiene |
 
 Each project is a folder with a `framewright.json` (your source of truth) and a `.hyperframes/index.html` that gets regenerated on every save.
 
@@ -101,13 +136,15 @@ Each project is a folder with a `framewright.json` (your source of truth) and a 
 
 ```
 src/
-  index.ts                  # @clack/prompts main loop, command router
+  index.ts                  # commander entry — dispatches subcommand OR interactive
+  interactive.ts            # @clack/prompts menu loop (default mode)
+  headless.ts               # one-function-per-subcommand for scriptable use
   banner.ts                 # figlet ASCII intro
   lib/
     project.ts              # framewright.json read/write + types
     claude.ts               # `claude -p` subprocess wrapper (skills auto-load)
     hyperframes.ts          # execa wrapper + composition HTML builder
-  commands/
+  commands/                 # @clack/prompts wrappers used by interactive mode
     newProject.ts
     addScene.ts
     generateScript.ts       # → claude -p → scenes JSON
