@@ -12,9 +12,16 @@ function claudeBin(): { command: string; baseArgs: string[] } {
 }
 
 export async function hasClaudeCode(): Promise<boolean> {
+  const { command, baseArgs } = claudeBin();
   try {
-    const { exitCode } = await execa('claude', ['--version'], { stdio: 'pipe' });
-    return exitCode === 0;
+    const result = await execa(command, [...baseArgs, '--version'], {
+      stdio: 'pipe',
+      env: process.env,
+      reject: false,
+    });
+    if (result.exitCode === 0) return true;
+    const combined = `${result.stdout ?? ''}\n${result.stderr ?? ''}`;
+    return /\b\d+\.\d+\.\d+/.test(combined);
   } catch {
     return false;
   }
