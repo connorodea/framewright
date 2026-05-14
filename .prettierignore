@@ -1,0 +1,6 @@
+dist/
+node_modules/
+coverage/
+*.tsbuildinfo
+examples/**/framewright.json
+package-lock.json
