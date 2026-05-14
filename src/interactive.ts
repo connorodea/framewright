@@ -1,12 +1,7 @@
 import * as p from '@clack/prompts';
 import color from 'picocolors';
 import { printBanner } from './banner.js';
-import {
-  exists,
-  loadProject,
-  projectPath,
-  totalDurationMs,
-} from './lib/project.js';
+import { exists, loadProject, projectPath, totalDurationMs } from './lib/project.js';
 import { cmdNew } from './commands/newProject.js';
 import { cmdAddScene } from './commands/addScene.js';
 import { cmdGenerateScript } from './commands/generateScript.js';
@@ -45,9 +40,7 @@ export async function runInteractive(): Promise<void> {
           `${color.cyan(project.name)}  ${color.dim(`${project.width}x${project.height} @ ${project.fps}fps · ${project.scenes.length} scene(s) · ${totalSec}s`)}`,
         );
       } catch (err) {
-        p.log.warn(
-          `Couldn't read project: ${err instanceof Error ? err.message : String(err)}`,
-        );
+        p.log.warn(`Couldn't read project: ${err instanceof Error ? err.message : String(err)}`);
         activeDir = null;
       }
     } else {

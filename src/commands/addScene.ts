@@ -69,7 +69,8 @@ export async function cmdAddScene(dir: string): Promise<void> {
     scene.notes = notes as string;
   } else {
     const text = await p.text({
-      message: kind === 'title' ? 'Title text' : kind === 'caption' ? 'Caption text' : 'Voiceover script',
+      message:
+        kind === 'title' ? 'Title text' : kind === 'caption' ? 'Caption text' : 'Voiceover script',
       placeholder:
         kind === 'title'
           ? 'Your boldest line'
@@ -89,8 +90,7 @@ export async function cmdAddScene(dir: string): Promise<void> {
     message: 'Duration (seconds)',
     placeholder: '3',
     initialValue: '3',
-    validate: (v) =>
-      /^\d+(\.\d+)?$/.test(v) && Number(v) > 0 ? undefined : 'Positive number',
+    validate: (v) => (/^\d+(\.\d+)?$/.test(v) && Number(v) > 0 ? undefined : 'Positive number'),
   });
   if (p.isCancel(durationStr)) {
     p.cancel('Cancelled.');

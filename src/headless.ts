@@ -16,15 +16,8 @@ import {
   type Scene,
   type SceneKind,
 } from './lib/project.js';
-import {
-  ensureHyperframesScaffold,
-  runHyperframes,
-} from './lib/hyperframes.js';
-import {
-  captureWebsiteViaSkill,
-  generateScript,
-  hasClaudeCode,
-} from './lib/claude.js';
+import { ensureHyperframesScaffold, runHyperframes } from './lib/hyperframes.js';
+import { captureWebsiteViaSkill, generateScript, hasClaudeCode } from './lib/claude.js';
 
 const PRESETS: Record<string, [number, number]> = {
   vertical: [1080, 1920],
@@ -136,7 +129,8 @@ export async function headlessAdd(kind: string, opts: AddOpts, cwd: string): Pro
   }
   const { dir, project } = await resolveProject(cwd);
   const durationSec = opts.duration ? Number(opts.duration) : 3;
-  if (!Number.isFinite(durationSec) || durationSec <= 0) die('--duration must be a positive number');
+  if (!Number.isFinite(durationSec) || durationSec <= 0)
+    die('--duration must be a positive number');
 
   const scene: Scene = {
     id: nextSceneId(project),
@@ -215,10 +209,7 @@ export async function headlessScript(topic: string, opts: ScriptOpts, cwd: strin
 export async function headlessPreview(cwd: string): Promise<void> {
   const { dir, project } = await resolveProject(cwd);
   await ensureHyperframesScaffold(project, dir);
-  const { exitCode, stderr } = await runHyperframes(
-    ['preview', '.hyperframes/index.html'],
-    dir,
-  );
+  const { exitCode, stderr } = await runHyperframes(['preview', '.hyperframes/index.html'], dir);
   if (exitCode !== 0) die(stderr || `hyperframes preview exited ${exitCode}`);
 }
 
@@ -269,7 +260,8 @@ export async function headlessClone(url: string, opts: CloneOpts, cwd: string): 
   if (!/^https?:\/\//.test(url)) die('url must start with http(s)://');
 
   const durationSec = opts.duration ? Number(opts.duration) : 20;
-  if (!Number.isFinite(durationSec) || durationSec <= 0) die('--duration must be a positive number');
+  if (!Number.isFinite(durationSec) || durationSec <= 0)
+    die('--duration must be a positive number');
   const captureSec = Math.min(6, Math.max(3, Math.round(durationSec * 0.25)));
 
   const hostFromUrl = (() => {
@@ -321,7 +313,11 @@ export async function headlessClone(url: string, opts: CloneOpts, cwd: string): 
   }));
   await saveProject(dir, project);
   await ensureHyperframesScaffold(project, dir);
-  log(color.dim(`        ${project.scenes.length} scene(s), ${(totalDurationMs(project) / 1000).toFixed(1)}s total`));
+  log(
+    color.dim(
+      `        ${project.scenes.length} scene(s), ${(totalDurationMs(project) / 1000).toFixed(1)}s total`,
+    ),
+  );
 
   log(color.dim('[3/4] invoking website-to-hyperframes skill'));
   const cap = await captureWebsiteViaSkill({
@@ -330,7 +326,11 @@ export async function headlessClone(url: string, opts: CloneOpts, cwd: string): 
     projectDir: dir,
   });
   if (!cap.ok) {
-    log(color.yellow('        skill invocation reported failure — continuing with static composition'));
+    log(
+      color.yellow(
+        '        skill invocation reported failure — continuing with static composition',
+      ),
+    );
     log(color.dim('        (' + cap.log.slice(-300).replace(/\n+/g, ' ') + ')'));
   }
 
@@ -342,9 +342,7 @@ export async function headlessClone(url: string, opts: CloneOpts, cwd: string): 
 
   log(color.dim('[4/4] rendering'));
   const format = opts.format ?? 'mp4';
-  const outPath = opts.out
-    ? resolve(opts.out)
-    : join(dir, 'renders', `${slug}.${format}`);
+  const outPath = opts.out ? resolve(opts.out) : join(dir, 'renders', `${slug}.${format}`);
   await mkdir(join(outPath, '..'), { recursive: true });
   const { exitCode, stderr } = await runHyperframes(
     ['render', '.hyperframes/index.html', '--out', outPath, '--fps', String(project.fps)],

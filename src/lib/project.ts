@@ -2,13 +2,7 @@ import { readFile, writeFile, mkdir, access } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { constants } from 'node:fs';
 
-export type SceneKind =
-  | 'title'
-  | 'caption'
-  | 'voiceover'
-  | 'website-capture'
-  | 'image'
-  | 'custom';
+export type SceneKind = 'title' | 'caption' | 'voiceover' | 'website-capture' | 'image' | 'custom';
 
 export interface Scene {
   id: string;
@@ -54,10 +48,7 @@ export async function loadProject(dir: string): Promise<FramewrightProject> {
   return JSON.parse(raw) as FramewrightProject;
 }
 
-export async function saveProject(
-  dir: string,
-  project: FramewrightProject,
-): Promise<void> {
+export async function saveProject(dir: string, project: FramewrightProject): Promise<void> {
   const path = projectPath(dir);
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, JSON.stringify(project, null, 2) + '\n', 'utf8');

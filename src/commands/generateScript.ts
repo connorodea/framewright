@@ -1,11 +1,6 @@
 import * as p from '@clack/prompts';
 import color from 'picocolors';
-import {
-  loadProject,
-  nextSceneId,
-  saveProject,
-  type Scene,
-} from '../lib/project.js';
+import { loadProject, nextSceneId, saveProject, type Scene } from '../lib/project.js';
 import { ensureHyperframesScaffold } from '../lib/hyperframes.js';
 import { generateScript, hasClaudeCode } from '../lib/claude.js';
 
@@ -82,10 +77,7 @@ export async function cmdGenerateScript(dir: string): Promise<void> {
     s.stop(`Got ${script.scenes.length} scenes`);
   } catch (err) {
     s.stop(color.red('Claude call failed'));
-    p.note(
-      err instanceof Error ? err.message : String(err),
-      color.red('Error'),
-    );
+    p.note(err instanceof Error ? err.message : String(err), color.red('Error'));
     return;
   }
 
