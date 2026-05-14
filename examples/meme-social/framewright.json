@@ -1,0 +1,46 @@
+{
+  "name": "Meme social",
+  "slug": "meme-social",
+  "createdAt": "2026-05-14T00:00:00.000Z",
+  "width": 1080,
+  "height": 1080,
+  "fps": 30,
+  "scenes": [
+    {
+      "id": "scene-01",
+      "kind": "title",
+      "text": "POV: you just ran npm install.",
+      "durationMs": 2500
+    },
+    {
+      "id": "scene-02",
+      "kind": "custom",
+      "notes": "Screen recording of a terminal where npm install has been spinning on 'idealTree' for 47 seconds. CPU fan audio rising in the background. Add a tiny timer in the top-right that counts up too fast to read.",
+      "durationMs": 3500
+    },
+    {
+      "id": "scene-03",
+      "kind": "caption",
+      "text": "1,247 packages. 3 of them do something.",
+      "durationMs": 3000
+    },
+    {
+      "id": "scene-04",
+      "kind": "custom",
+      "notes": "Drake meme layout, but the top panel is 'reading the docs' and the bottom panel is 'asking Claude to read the docs for me.' Hold for the laugh.",
+      "durationMs": 3500
+    },
+    {
+      "id": "scene-05",
+      "kind": "caption",
+      "text": "Anyway, my tests pass on my machine.",
+      "durationMs": 2500
+    },
+    {
+      "id": "scene-06",
+      "kind": "title",
+      "text": "Ship it.",
+      "durationMs": 2000
+    }
+  ]
+}

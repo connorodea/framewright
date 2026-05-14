@@ -1,0 +1,65 @@
+{
+  "name": "B2B explainer",
+  "slug": "b2b-explainer",
+  "createdAt": "2026-05-14T00:00:00.000Z",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "scenes": [
+    {
+      "id": "scene-01",
+      "kind": "title",
+      "text": "Meet Northwind.",
+      "durationMs": 3000
+    },
+    {
+      "id": "scene-02",
+      "kind": "voiceover",
+      "text": "Northwind is the warehouse operations platform built for distributors who outgrew their spreadsheets but can't justify SAP.",
+      "durationMs": 6000
+    },
+    {
+      "id": "scene-03",
+      "kind": "caption",
+      "text": "The problem: every order touches four different systems.",
+      "durationMs": 4000
+    },
+    {
+      "id": "scene-04",
+      "kind": "voiceover",
+      "text": "Your team rekeys the same SKU into your ERP, your shipping label printer, your inventory sheet, and your customer portal. Mistakes happen. Customers churn.",
+      "durationMs": 7500
+    },
+    {
+      "id": "scene-05",
+      "kind": "website-capture",
+      "url": "https://example.com/northwind",
+      "text": "One dashboard. All four jobs.",
+      "durationMs": 5500
+    },
+    {
+      "id": "scene-06",
+      "kind": "voiceover",
+      "text": "Scan a bin, print the label, update the ledger, notify the buyer. One action, four systems updated, zero retyping.",
+      "durationMs": 6500
+    },
+    {
+      "id": "scene-07",
+      "kind": "caption",
+      "text": "Customers ship 38% more orders per picker.",
+      "durationMs": 4000
+    },
+    {
+      "id": "scene-08",
+      "kind": "voiceover",
+      "text": "We integrate with NetSuite, ShipStation, Shopify, and your existing scanners. Onboarding takes a week, not a quarter.",
+      "durationMs": 6000
+    },
+    {
+      "id": "scene-09",
+      "kind": "title",
+      "text": "Worth a fifteen-minute call?",
+      "durationMs": 3000
+    }
+  ]
+}
