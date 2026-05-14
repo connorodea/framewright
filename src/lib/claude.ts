@@ -184,7 +184,7 @@ export async function generateVoiceoverViaSkill(opts: {
   };
 }
 
-function parseScriptFromClaudeOutput(raw: string): GeneratedScript {
+export function parseScriptFromClaudeOutput(raw: string): GeneratedScript {
   // claude -p --output-format json wraps the result. Try parsing it as the
   // wrapper first, then fall back to treating raw as the script JSON.
   let candidate = raw.trim();
