@@ -1,6 +1,6 @@
 import color from 'picocolors';
 import { join, resolve } from 'node:path';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import {
   exists,
   loadProject,
@@ -79,6 +79,9 @@ export async function headlessNew(name: string, opts: NewOpts, cwd: string): Pro
   if (!Number.isFinite(fps) || fps <= 0) die('--fps must be a positive integer');
 
   const slug = slugify(name);
+  if (!slug) {
+    die('name must contain at least one letter or digit (got only whitespace/punctuation)');
+  }
   const dir = projectDir(cwd, slug);
   if ((await exists(projectPath(dir))) && !opts.force) {
     die(`project already exists at ${dir} (use --force to overwrite)`);
@@ -281,21 +284,29 @@ export async function headlessClone(url: string, opts: CloneOpts, cwd: string): 
   })();
   const name = opts.name ?? `${hostFromUrl}-${new Date().toISOString().slice(0, 10)}`;
   const slug = slugify(name);
+  if (!slug) die('derived project name is empty — pass --name <name> to override');
   const dir = projectDir(cwd, slug);
 
-  log(color.dim(`[1/4] scaffolding ${slug} in ${dir}`));
+  // Build the script first (cheap to retry, expensive to leave half-baked state).
+  // Only touch the filesystem after Claude returns a valid script.
+  log(color.dim(`[1/4] generating script with Claude Code (~${durationSec}s)`));
   const project = newProject({ name, width: 1080, height: 1920, fps: 30 });
-  await saveProject(dir, project);
-  await ensureHyperframesScaffold(project, dir);
+  let script;
+  try {
+    script = await generateScript({
+      topic: `${durationSec}-second teaser for the website ${url}`,
+      tone: opts.tone ?? 'punchy founder',
+      targetDurationSec: durationSec,
+      project,
+      cwd: cwd,
+    });
+  } catch (err) {
+    die(
+      `Claude script generation failed: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
 
-  log(color.dim(`[2/4] generating script with Claude Code (~${durationSec}s)`));
-  const script = await generateScript({
-    topic: `30-second teaser for the website ${url}`,
-    tone: opts.tone ?? 'punchy founder',
-    targetDurationSec: durationSec,
-    project,
-    cwd: dir,
-  });
+  log(color.dim(`[2/4] scaffolding ${slug} in ${dir}`));
   for (const gs of script.scenes) {
     project.scenes.push({
       id: nextSceneId(project),
@@ -330,8 +341,15 @@ export async function headlessClone(url: string, opts: CloneOpts, cwd: string): 
     projectDir: dir,
   });
   if (!cap.ok) {
-    log(color.yellow('        skill invocation reported failure — continuing with static composition'));
-    log(color.dim('        (' + cap.log.slice(-300).replace(/\n+/g, ' ') + ')'));
+    const logPath = join(dir, '.hyperframes', 'capture.log');
+    await mkdir(join(logPath, '..'), { recursive: true });
+    await writeFile(logPath, cap.log, 'utf8');
+    log(
+      color.yellow(
+        '        skill invocation reported failure — continuing with static composition',
+      ),
+    );
+    log(color.dim(`        full log: ${logPath}`));
   }
 
   if (opts.noRender) {
