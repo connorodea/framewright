@@ -135,12 +135,9 @@ gsap, animejs) become available to framewright with zero code changes.
 
 ## Roadmap
 
-- [ ] Re-order scenes (drag-equivalent via picker).
-- [ ] Per-scene `kokoro` voiceover generation (via `hyperframes-media` skill).
-- [ ] `framewright clone <url>` — one-shot website-to-video via the `website-to-hyperframes` skill.
-- [ ] Theme presets (brand color + font tokens).
-- [ ] Multi-track audio (background music).
-- [ ] `framewright watch` — auto-rebuild composition on JSON change.
+The full phased plan — from initial CLI through `npm publish` and launch — lives in
+[`ROADMAP.md`](./ROADMAP.md) and is mirrored as a Todoist project for active
+development tracking.
 
 ## License
 
