@@ -1,0 +1,47 @@
+{
+  "name": "framewright",
+  "version": "0.1.0",
+  "description": "Interactive CLI for crafting AI videos with Claude + HyperFrames.",
+  "type": "module",
+  "bin": {
+    "framewright": "./dist/index.js",
+    "fw": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "cli",
+    "video",
+    "hyperframes",
+    "claude",
+    "ai",
+    "clack"
+  ],
+  "author": "Connor O'Dea <connor@upscaledinc.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@clack/prompts": "^0.8.2",
+    "execa": "^9.5.1",
+    "figlet": "^1.8.0",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/figlet": "^1.7.0",
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ]
+}
