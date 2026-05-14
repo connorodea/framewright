@@ -12,6 +12,9 @@ import { cmdAddScene } from './commands/addScene.js';
 import { cmdGenerateScript } from './commands/generateScript.js';
 import { cmdListScenes } from './commands/listScenes.js';
 import { cmdRemoveScene } from './commands/removeScene.js';
+import { cmdEditScene } from './commands/editScene.js';
+import { cmdReorderScenes } from './commands/reorderScenes.js';
+import { cmdDuplicateScene } from './commands/duplicateScene.js';
 import { cmdPreview } from './commands/preview.js';
 import { cmdRender } from './commands/render.js';
 import { cmdCaptureWebsite } from './commands/captureWebsite.js';
@@ -25,6 +28,9 @@ type Action =
   | 'script'
   | 'voiceover'
   | 'remove'
+  | 'edit'
+  | 'reorder'
+  | 'duplicate'
   | 'preview'
   | 'render'
   | 'quit';
@@ -64,6 +70,9 @@ export async function runInteractive(): Promise<void> {
             { value: 'capture', label: 'Add website capture (via skill)' },
             { value: 'voiceover', label: 'Generate kokoro voiceover (via skill)' },
             { value: 'remove', label: 'Remove a scene' },
+            { value: 'edit', label: 'Edit scene' },
+            { value: 'reorder', label: 'Reorder scenes' },
+            { value: 'duplicate', label: 'Duplicate scene' },
             { value: 'preview', label: 'Preview composition' },
             { value: 'render', label: 'Render to file' },
             { value: 'new', label: 'New project (different directory)' },
@@ -104,6 +113,15 @@ export async function runInteractive(): Promise<void> {
           break;
         case 'remove':
           await cmdRemoveScene(activeDir!);
+          break;
+        case 'edit':
+          await cmdEditScene(activeDir!);
+          break;
+        case 'reorder':
+          await cmdReorderScenes(activeDir!);
+          break;
+        case 'duplicate':
+          await cmdDuplicateScene(activeDir!);
           break;
         case 'preview':
           await cmdPreview(activeDir!);

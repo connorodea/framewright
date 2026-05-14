@@ -107,6 +107,9 @@ fw clone https://aiwholesail.com --duration 25 --out ./demo.mp4
 | `fw new <name>` | Scaffold a project. Flags: `--preset`, `--width`, `--height`, `--fps`, `--force` |
 | `fw list` (`ls`) | List scenes. `--json` dumps the full project file |
 | `fw add <kind>` | Append a scene. Flags: `--text`, `--url`, `--image`, `--duration`, `--voice` |
+| `fw edit <sceneId>` | Edit a scene field. Flags: `--text`, `--duration`, `--voice` |
+| `fw reorder <sceneId>` | Move a scene. Flags: `--position <n>`, `--up`, `--down` |
+| `fw duplicate <sceneId>` | Clone a scene and append the copy to the end |
 | `fw script <topic>` | Claude Code → multi-scene script. Flags: `--tone`, `--duration`, `--append`, `--json` |
 | `fw preview` | Open the HyperFrames preview window |
 | `fw render` | Render to file. Flags: `--format mp4\|webm\|gif`, `--out <path>` |

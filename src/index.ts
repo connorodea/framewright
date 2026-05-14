@@ -6,10 +6,13 @@ import { runInteractive } from './interactive.js';
 import {
   headlessAdd,
   headlessClone,
+  headlessDuplicate,
+  headlessEdit,
   headlessList,
   headlessNew,
   headlessPreview,
   headlessRender,
+  headlessReorder,
   headlessScript,
 } from './headless.js';
 
@@ -60,6 +63,33 @@ program
   .option('--voice <name>', 'voice id for voiceover (e.g. af_bella)')
   .action(async (kind, opts) => {
     await headlessAdd(kind, opts, process.cwd());
+  });
+
+program
+  .command('edit [sceneId]')
+  .description('Edit a scene field (text, duration, voice)')
+  .option('--text <text>', 'replace the scene text / notes')
+  .option('--duration <sec>', 'replace duration in seconds')
+  .option('--voice <name>', 'replace voice id (voiceover scenes only)')
+  .action(async (sceneId, opts) => {
+    await headlessEdit(sceneId, opts, process.cwd());
+  });
+
+program
+  .command('reorder [sceneId]')
+  .description('Move a scene up, down, or to a specific position')
+  .option('--position <n>', '1-based target position')
+  .option('--up', 'move one slot up')
+  .option('--down', 'move one slot down')
+  .action(async (sceneId, opts) => {
+    await headlessReorder(sceneId, opts, process.cwd());
+  });
+
+program
+  .command('duplicate <sceneId>')
+  .description('Duplicate a scene and append the copy to the end')
+  .action(async (sceneId) => {
+    await headlessDuplicate(sceneId, process.cwd());
   });
 
 program
