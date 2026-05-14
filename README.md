@@ -56,10 +56,10 @@ npx skills add heygen-com/hyperframes
 
 Optional env overrides (copy `.env.example` → `.env` if you want them):
 
-| Variable                 | Default                | Purpose                              |
-|--------------------------|------------------------|--------------------------------------|
-| `FRAMEWRIGHT_CLAUDE_BIN` | `claude`               | Pin a specific Claude Code binary    |
-| `HYPERFRAMES_BIN`        | `npx --yes hyperframes`| Pin a specific HyperFrames invocation|
+| Variable                 | Default                 | Purpose                               |
+| ------------------------ | ----------------------- | ------------------------------------- |
+| `FRAMEWRIGHT_CLAUDE_BIN` | `claude`                | Pin a specific Claude Code binary     |
+| `HYPERFRAMES_BIN`        | `npx --yes hyperframes` | Pin a specific HyperFrames invocation |
 
 ## Usage
 
@@ -102,16 +102,16 @@ fw clone https://aiwholesail.com --duration 25 --out ./demo.mp4
 `fw clone` scaffolds a project, calls Claude Code for a script, invokes the
 `website-to-hyperframes` skill to capture the live site, and renders the result.
 
-| Subcommand | What it does |
-|---|---|
-| `fw new <name>` | Scaffold a project. Flags: `--preset`, `--width`, `--height`, `--fps`, `--force` |
-| `fw list` (`ls`) | List scenes. `--json` dumps the full project file |
-| `fw add <kind>` | Append a scene. Flags: `--text`, `--url`, `--image`, `--duration`, `--voice` |
-| `fw script <topic>` | Claude Code → multi-scene script. Flags: `--tone`, `--duration`, `--append`, `--json` |
-| `fw preview` | Open the HyperFrames preview window |
-| `fw render` | Render to file. Flags: `--format mp4\|webm\|gif`, `--out <path>` |
-| `fw clone <url>` | One-shot website → video pipeline |
-| `fw --version` / `fw --help` | Standard hygiene |
+| Subcommand                   | What it does                                                                          |
+| ---------------------------- | ------------------------------------------------------------------------------------- |
+| `fw new <name>`              | Scaffold a project. Flags: `--preset`, `--width`, `--height`, `--fps`, `--force`      |
+| `fw list` (`ls`)             | List scenes. `--json` dumps the full project file                                     |
+| `fw add <kind>`              | Append a scene. Flags: `--text`, `--url`, `--image`, `--duration`, `--voice`          |
+| `fw script <topic>`          | Claude Code → multi-scene script. Flags: `--tone`, `--duration`, `--append`, `--json` |
+| `fw preview`                 | Open the HyperFrames preview window                                                   |
+| `fw render`                  | Render to file. Flags: `--format mp4\|webm\|gif`, `--out <path>`                      |
+| `fw clone <url>`             | One-shot website → video pipeline                                                     |
+| `fw --version` / `fw --help` | Standard hygiene                                                                      |
 
 Each project is a folder with a `framewright.json` (your source of truth) and a `.hyperframes/index.html` that gets regenerated on every save.
 
@@ -125,9 +125,9 @@ Each project is a folder with a `framewright.json` (your source of truth) and a 
   "height": 1920,
   "fps": 30,
   "scenes": [
-    { "id": "scene-01", "kind": "title",    "text": "We built it.",         "durationMs": 2500 },
-    { "id": "scene-02", "kind": "caption",  "text": "Off-market deals",     "durationMs": 2000 },
-    { "id": "scene-03", "kind": "voiceover","text": "Here's how it works.", "durationMs": 4000 }
+    { "id": "scene-01", "kind": "title", "text": "We built it.", "durationMs": 2500 },
+    { "id": "scene-02", "kind": "caption", "text": "Off-market deals", "durationMs": 2000 },
+    { "id": "scene-03", "kind": "voiceover", "text": "Here's how it works.", "durationMs": 4000 }
   ]
 }
 ```

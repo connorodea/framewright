@@ -1,11 +1,6 @@
 import * as p from '@clack/prompts';
 import color from 'picocolors';
-import {
-  loadProject,
-  nextSceneId,
-  saveProject,
-  type Scene,
-} from '../lib/project.js';
+import { loadProject, nextSceneId, saveProject, type Scene } from '../lib/project.js';
 import { ensureHyperframesScaffold } from '../lib/hyperframes.js';
 import { captureWebsiteViaSkill, hasClaudeCode } from '../lib/claude.js';
 
@@ -59,10 +54,7 @@ export async function cmdCaptureWebsite(dir: string): Promise<void> {
 
   if (useSkill) {
     if (!(await hasClaudeCode())) {
-      p.note(
-        '`claude` CLI not found on PATH. Skipping skill invocation.',
-        color.yellow('Skipped'),
-      );
+      p.note('`claude` CLI not found on PATH. Skipping skill invocation.', color.yellow('Skipped'));
       return;
     }
     const sSkill = p.spinner();

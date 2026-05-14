@@ -203,11 +203,7 @@ function parseScriptFromClaudeOutput(raw: string): GeneratedScript {
   }
   candidate = stripCodeFence(candidate);
   const parsed = JSON.parse(candidate) as unknown;
-  if (
-    !parsed ||
-    typeof parsed !== 'object' ||
-    !Array.isArray((parsed as GeneratedScript).scenes)
-  ) {
+  if (!parsed || typeof parsed !== 'object' || !Array.isArray((parsed as GeneratedScript).scenes)) {
     throw new Error('Claude did not return a script with a "scenes" array.');
   }
   return parsed as GeneratedScript;

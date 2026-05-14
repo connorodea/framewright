@@ -51,9 +51,7 @@ export async function ensureHyperframesScaffold(
 
 export function buildCompositionHtml(project: FramewrightProject): string {
   const totalMs = project.scenes.reduce((s, sc) => s + sc.durationMs, 0) || 5000;
-  const sceneMarkup = project.scenes
-    .map((s, i) => sceneToHtml(s, i, project))
-    .join('\n');
+  const sceneMarkup = project.scenes.map((s, i) => sceneToHtml(s, i, project)).join('\n');
 
   return `<!doctype html>
 <html lang="en">
@@ -99,14 +97,8 @@ ${sceneMarkup}
 `;
 }
 
-function sceneToHtml(
-  scene: Scene,
-  index: number,
-  project: FramewrightProject,
-): string {
-  const start = project.scenes
-    .slice(0, index)
-    .reduce((s, sc) => s + sc.durationMs, 0);
+function sceneToHtml(scene: Scene, index: number, project: FramewrightProject): string {
+  const start = project.scenes.slice(0, index).reduce((s, sc) => s + sc.durationMs, 0);
   const end = start + scene.durationMs;
   const body = escapeHtml(scene.text ?? scene.url ?? scene.notes ?? scene.kind);
   return `  <section class="scene ${scene.kind}" data-start="${start}" data-end="${end}"><div class="text">${body}</div></section>`;

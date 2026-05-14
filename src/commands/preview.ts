@@ -20,11 +20,11 @@ export async function cmdPreview(dir: string): Promise<void> {
     'Preview',
   );
 
-  const { exitCode, stderr } = await runHyperframes(
-    ['preview', '.hyperframes/index.html'],
-    dir,
-  );
+  const { exitCode, stderr } = await runHyperframes(['preview', '.hyperframes/index.html'], dir);
   if (exitCode !== 0) {
-    p.note(stderr || `hyperframes preview exited with code ${exitCode}`, color.red('Preview failed'));
+    p.note(
+      stderr || `hyperframes preview exited with code ${exitCode}`,
+      color.red('Preview failed'),
+    );
   }
 }
