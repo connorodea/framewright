@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>framewright — Craft AI videos from your terminal</title>
+<meta name="description" content="A Clack-style interactive TypeScript CLI for crafting AI videos from your terminal. Powered by Claude Code and HyperFrames." />
+<meta property="og:title" content="framewright" />
+<meta property="og:description" content="Craft AI videos from your terminal. Powered by Claude Code + HyperFrames." />
+<meta property="og:type" content="website" />
+<meta name="theme-color" content="#0a0a0f" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;
+  --bg-elev:#11111a;
+  --border:#1f1f2e;
+  --text:#e5e7eb;
+  --text-dim:#9ca3af;
+  --heading:#fff;
+  --magenta:#c026d3;
+  --magenta-soft:rgba(192,38,211,.12);
+  --cyan:#22d3ee;
+  --cyan-soft:rgba(34,211,238,.12);
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.6;
+  color:var(--text);
+  background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+a{color:var(--cyan);text-decoration:none}
+a:hover,a:focus-visible{text-decoration:underline}
+a:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:4px}
+h1,h2,h3{color:var(--heading);line-height:1.2;letter-spacing:-.01em;margin:0 0 .5em}
+h2{font-size:clamp(1.5rem,3vw,2rem);font-weight:700;margin-bottom:1.25rem}
+h3{font-size:1.125rem;font-weight:600}
+p{margin:0 0 1rem}
+code,pre,kbd{font-family:var(--mono)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 1.25rem}
+header{padding:1.5rem 0;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,10,15,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:10}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.brand{font-family:var(--mono);font-weight:700;font-size:1.05rem;color:var(--heading)}
+.brand .c{color:var(--cyan)}
+nav ul{list-style:none;margin:0;padding:0;display:flex;gap:1.5rem;font-size:.95rem}
+nav a{color:var(--text-dim)}
+nav a:hover{color:var(--text)}
+main{padding:4rem 0 2rem}
+.hero{text-align:center;padding-bottom:3rem}
+.ascii{
+  display:inline-block;
+  text-align:left;
+  font-family:var(--mono);
+  font-size:clamp(.45rem,1.45vw,.85rem);
+  line-height:1.1;
+  margin:0 0 2rem;
+  white-space:pre;
+  overflow-x:auto;
+  max-width:100%;
+  padding:.5rem;
+}
+.ascii .m{color:var(--magenta)}
+.ascii .y{color:var(--cyan)}
+.tagline{font-size:clamp(1.05rem,2vw,1.25rem);color:var(--text);max-width:36rem;margin:0 auto 2rem}
+.tagline strong{color:var(--heading);font-weight:600}
+.install{
+  display:inline-flex;align-items:center;gap:.75rem;
+  background:var(--bg-elev);border:1px solid var(--border);
+  border-radius:10px;padding:.6rem .85rem;
+  font-family:var(--mono);font-size:.95rem;
+  max-width:100%;
+}
+.install code{color:var(--text)}
+.install code .p{color:var(--magenta)}
+.install button{
+  background:transparent;border:1px solid var(--border);color:var(--text-dim);
+  font-family:var(--mono);font-size:.75rem;
+  padding:.3rem .6rem;border-radius:6px;cursor:pointer;
+  transition:color .15s ease,border-color .15s ease,background .15s ease;
+}
+.install button:hover,.install button:focus-visible{color:var(--cyan);border-color:var(--cyan);background:var(--cyan-soft)}
+.install button:focus-visible{outline:none}
+section{padding:3rem 0;border-top:1px solid var(--border)}
+section h2{display:flex;align-items:center;gap:.6rem}
+section h2::before{content:"";display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--magenta)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem;margin-top:1.5rem}
+.card{
+  background:var(--bg-elev);border:1px solid var(--border);
+  border-radius:14px;padding:1.5rem;
+  transition:border-color .2s ease,transform .2s ease;
+}
+.card:hover{border-color:#2a2a3e;transform:translateY(-2px)}
+.card h3{margin-top:0;display:flex;align-items:center;gap:.5rem;color:var(--cyan)}
+.card h3 .num{font-family:var(--mono);font-size:.75rem;color:var(--magenta);background:var(--magenta-soft);padding:.15rem .45rem;border-radius:999px}
+.card p{color:var(--text-dim);font-size:.95rem;margin:0}
+.card pre{margin-top:1rem;margin-bottom:0;font-size:.8rem}
+pre.block{
+  background:var(--bg-elev);border:1px solid var(--border);
+  border-radius:10px;padding:1rem 1.25rem;
+  overflow-x:auto;font-size:.875rem;line-height:1.55;
+  color:var(--text);
+}
+pre.block .cmt{color:var(--text-dim)}
+pre.block .m{color:var(--magenta)}
+pre.block .c{color:var(--cyan)}
+pre.block .s{color:#a3e635}
+.term{position:relative}
+.term::before{
+  content:"● ● ●";
+  display:block;
+  font-family:var(--mono);
+  font-size:.7rem;
+  letter-spacing:.3em;
+  color:#3f3f5a;
+  padding:.5rem 1.25rem .25rem;
+  background:var(--bg-elev);
+  border:1px solid var(--border);
+  border-bottom:none;
+  border-radius:10px 10px 0 0;
+}
+.term pre.block{border-radius:0 0 10px 10px;border-top:none;margin-top:0}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin:1.25rem 0}
+.step{background:var(--bg-elev);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem}
+.step .k{font-family:var(--mono);font-size:.7rem;color:var(--magenta);text-transform:uppercase;letter-spacing:.1em}
+.step p{margin:.25rem 0 0;color:var(--text-dim);font-size:.9rem}
+.step code{color:var(--cyan);font-size:.85rem}
+footer{border-top:1px solid var(--border);padding:2.5rem 0 3rem;margin-top:3rem;color:var(--text-dim);font-size:.9rem}
+footer .wrap{display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-between;align-items:center}
+footer ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:1.25rem}
+footer .meta{font-family:var(--mono);font-size:.8rem}
+@media (max-width:640px){
+  main{padding:2.5rem 0 1rem}
+  nav ul{gap:1rem;font-size:.85rem}
+  .ascii{font-size:.42rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none!important;animation:none!important}
+  .card:hover{transform:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <span class="brand">framewright<span class="c">_</span></span>
+    <nav aria-label="Primary">
+      <ul>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#quickstart">Quick start</a></li>
+        <li><a href="https://github.com/connorodea/framewright" target="_blank" rel="noopener">GitHub</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="wrap">
+      <h1 id="hero-title" class="sr-only" style="position:absolute;left:-9999px">framewright</h1>
+      <pre class="ascii" aria-hidden="true"><span class="m">███████╗██████╗  █████╗ ███╗   ███╗███████╗██╗    ██╗██████╗ ██╗ ██████╗ ██╗  ██╗████████╗</span>
+<span class="y">██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝██║    ██║██╔══██╗██║██╔════╝ ██║  ██║╚══██╔══╝</span>
+<span class="m">█████╗  ██████╔╝███████║██╔████╔██║█████╗  ██║ █╗ ██║██████╔╝██║██║  ███╗███████║   ██║   </span>
+<span class="y">██╔══╝  ██╔══██╗██╔══██║██║╚██╔╝██║██╔══╝  ██║███╗██║██╔══██╗██║██║   ██║██╔══██║   ██║   </span>
+<span class="m">██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗╚███╔███╔╝██║  ██║██║╚██████╔╝██║  ██║   ██║   </span>
+<span class="y">╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   </span></pre>
+      <p class="tagline"><strong>Craft AI videos from your terminal.</strong> Powered by Claude Code + HyperFrames.</p>
+      <div class="install" role="group" aria-label="Install command">
+        <code><span class="p">$</span> npx framewright</code>
+        <button type="button" id="copyBtn" aria-label="Copy install command to clipboard">copy</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-title">
+    <div class="wrap">
+      <h2 id="features-title">Why framewright</h2>
+      <div class="grid">
+        <article class="card">
+          <h3><span class="num">01</span>Skill-driven</h3>
+          <p>Newly installed Claude Code skills become available with zero code changes. Trigger phrases like <code>hyperframes</code>, <code>lottie</code>, or <code>gsap</code> auto-load the right tools.</p>
+        </article>
+        <article class="card">
+          <h3><span class="num">02</span>Two modes</h3>
+          <p>Interactive menu when you type <code>fw</code>. Headless subcommands when you script — same logic, no surprises.</p>
+        </article>
+        <article class="card">
+          <h3><span class="num">03</span>Hero one-liner</h3>
+          <p>Capture a site and ship a video in a single command.</p>
+          <pre class="block"><span class="cmt"># turn any URL into a 30s promo</span>
+<span class="m">fw</span> clone <span class="c">https://yoursite.com</span> <span class="s">--out demo.mp4</span></pre>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="quickstart" aria-labelledby="quickstart-title">
+    <div class="wrap">
+      <h2 id="quickstart-title">Quick start</h2>
+      <div class="steps">
+        <div class="step"><div class="k">01 — Install</div><p><code>npx framewright</code> or <code>npm i -g framewright</code></p></div>
+        <div class="step"><div class="k">02 — Clone a site</div><p><code>fw clone https://example.com</code></p></div>
+        <div class="step"><div class="k">03 — Or script it</div><p><code>fw script "30s product tour"</code></p></div>
+      </div>
+
+      <div class="term" role="img" aria-label="Example terminal output from framewright">
+        <pre class="block"><span class="cmt">$ fw clone https://heygen.com --out heygen.mp4</span>
+<span class="m">┌</span>  framewright <span class="cmt">v0.1.0</span>
+<span class="m">│</span>
+<span class="m">◇</span>  <span class="c">website-to-hyperframes</span> skill loaded
+<span class="m">│</span>
+<span class="m">◇</span>  Capturing <span class="c">https://heygen.com</span> …
+<span class="m">│</span>   <span class="s">✓ 12 frames captured</span>
+<span class="m">│</span>
+<span class="m">◇</span>  Generating script with Claude …
+<span class="m">│</span>   <span class="s">✓ 6 scenes, 31s total</span>
+<span class="m">│</span>
+<span class="m">●</span>  Rendering <span class="c">heygen.mp4</span> via HyperFrames
+<span class="m">│</span>   <span class="s">▰▰▰▰▰▰▰▰▰▰</span> 100%
+<span class="m">│</span>
+<span class="m">└</span>  Done. <span class="s">heygen.mp4</span> <span class="cmt">(2.4 MB)</span></pre>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="meta">framewright // MIT</span>
+    <ul>
+      <li><a href="https://github.com/connorodea/framewright" target="_blank" rel="noopener">GitHub</a></li>
+      <li><a href="https://npmjs.com/package/framewright" target="_blank" rel="noopener">npm</a></li>
+      <li><a href="https://docs.claude.com/claude-code" target="_blank" rel="noopener">Claude Code</a></li>
+      <li><a href="https://github.com/heygen-com/hyperframes" target="_blank" rel="noopener">HyperFrames</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var btn=document.getElementById('copyBtn');
+  if(!btn||!navigator.clipboard)return;
+  btn.addEventListener('click',function(){
+    navigator.clipboard.writeText('npx framewright').then(function(){
+      var prev=btn.textContent;
+      btn.textContent='copied';
+      setTimeout(function(){btn.textContent=prev;},1400);
+    }).catch(function(){btn.textContent='press ⌘C';});
+  });
+})();
+</script>
+</body>
+</html>
