@@ -25,6 +25,13 @@ import {
   generateScript,
   hasClaudeCode,
 } from './lib/claude.js';
+import {
+  TEMPLATES,
+  getTemplate,
+  listTemplates,
+  materializeTemplate,
+  templateTotalMs,
+} from './lib/sceneTemplates.js';
 
 const PRESETS: Record<string, [number, number]> = {
   vertical: [1080, 1920],
@@ -367,4 +374,39 @@ export async function headlessClone(url: string, opts: CloneOpts, cwd: string): 
     die(stderr || `hyperframes render exited ${exitCode}`);
   }
   log(`${color.green('done')} → ${outPath}`);
+}
+
+// ---------------------------------------------------------------- fw template
+
+export interface TemplateOpts {
+  list?: boolean;
+}
+
+export async function headlessTemplate(
+  name: string | undefined,
+  opts: TemplateOpts,
+  cwd: string,
+): Promise<void> {
+  if (opts.list || !name) {
+    const tpls = listTemplates();
+    for (const t of tpls) {
+      const totalSec = (templateTotalMs(t) / 1000).toFixed(1);
+      log(
+        `${color.cyan(t.name.padEnd(8))} ${color.dim(`${t.scenes.length} scenes · ${totalSec}s`)}  ${t.description}`,
+      );
+    }
+    return;
+  }
+  const tpl = getTemplate(name);
+  if (!tpl) {
+    die(`unknown template "${name}". Valid: ${Object.keys(TEMPLATES).join(', ')}`);
+  }
+  const { dir, project } = await resolveProject(cwd);
+  const newScenes = materializeTemplate(tpl, () => nextSceneId(project));
+  project.scenes.push(...newScenes);
+  await saveProject(dir, project);
+  await ensureHyperframesScaffold(project, dir);
+  for (const s of newScenes) {
+    log(`${color.green('added')} ${s.id}  ${s.kind}  ${(s.durationMs / 1000).toFixed(1)}s  ${s.text}`);
+  }
 }

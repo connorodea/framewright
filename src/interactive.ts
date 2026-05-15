@@ -16,11 +16,13 @@ import { cmdPreview } from './commands/preview.js';
 import { cmdRender } from './commands/render.js';
 import { cmdCaptureWebsite } from './commands/captureWebsite.js';
 import { cmdGenerateVoiceover } from './commands/generateVoiceover.js';
+import { cmdInsertTemplate } from './commands/insertTemplate.js';
 
 type Action =
   | 'new'
   | 'list'
   | 'add'
+  | 'template'
   | 'capture'
   | 'script'
   | 'voiceover'
@@ -60,6 +62,7 @@ export async function runInteractive(): Promise<void> {
         ? [
             { value: 'list', label: 'List scenes' },
             { value: 'add', label: 'Add scene manually' },
+            { value: 'template', label: 'Insert template (hook / demo / CTA / outro)' },
             { value: 'script', label: 'Generate script with Claude Code' },
             { value: 'capture', label: 'Add website capture (via skill)' },
             { value: 'voiceover', label: 'Generate kokoro voiceover (via skill)' },
@@ -92,6 +95,9 @@ export async function runInteractive(): Promise<void> {
           break;
         case 'add':
           await cmdAddScene(activeDir!);
+          break;
+        case 'template':
+          await cmdInsertTemplate(activeDir!);
           break;
         case 'script':
           await cmdGenerateScript(activeDir!);
