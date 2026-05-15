@@ -29,6 +29,10 @@ export interface FramewrightProject {
   height: number;
   fps: number;
   scenes: Scene[];
+  // Monotonic counter that never decreases. Scene IDs come from this and are
+  // never reused — so `fw edit scene-03 ...` stays valid even after a reorder
+  // or remove. Older projects without this field fall back to scenes.length + 1.
+  nextSceneNumber?: number;
   voiceDefault?: string;
   hyperframesProjectDir?: string;
 }
@@ -63,9 +67,28 @@ export async function saveProject(
   await writeFile(path, JSON.stringify(project, null, 2) + '\n', 'utf8');
 }
 
+/**
+ * Allocate the next scene id. **Mutates `project.nextSceneNumber`** — callers
+ * must `saveProject` afterwards. IDs are monotonic and never reused, so
+ * `fw edit scene-03 ...` stays valid across reorder/remove/duplicate.
+ *
+ * Legacy projects (created before `nextSceneNumber` existed) bootstrap the
+ * counter from the highest existing `scene-NN` id, or fall back to
+ * `scenes.length + 1` if no IDs are parseable.
+ */
 export function nextSceneId(project: FramewrightProject): string {
-  const n = project.scenes.length + 1;
-  return `scene-${String(n).padStart(2, '0')}`;
+  if (project.nextSceneNumber === undefined) {
+    const highest = project.scenes.reduce((max, s) => {
+      const m = /^scene-(\d+)$/.exec(s.id);
+      if (!m) return max;
+      const n = Number(m[1]);
+      return Number.isFinite(n) && n > max ? n : max;
+    }, 0);
+    project.nextSceneNumber = Math.max(highest, project.scenes.length) + 1;
+  } else {
+    project.nextSceneNumber += 1;
+  }
+  return `scene-${String(project.nextSceneNumber).padStart(2, '0')}`;
 }
 
 export function slugify(name: string): string {
@@ -90,6 +113,7 @@ export function newProject(opts: {
     height: opts.height,
     fps: opts.fps,
     scenes: [],
+    nextSceneNumber: 0,
   };
 }
 

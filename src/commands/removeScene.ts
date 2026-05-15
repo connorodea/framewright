@@ -29,11 +29,6 @@ export async function cmdRemoveScene(dir: string): Promise<void> {
   }
 
   project.scenes = project.scenes.filter((s) => s.id !== id);
-  // Re-id remaining scenes so order stays clean.
-  project.scenes = project.scenes.map((s, i) => ({
-    ...s,
-    id: `scene-${String(i + 1).padStart(2, '0')}`,
-  }));
 
   const sp = p.spinner();
   sp.start('Saving');

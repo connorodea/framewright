@@ -325,11 +325,6 @@ export async function headlessClone(url: string, opts: CloneOpts, cwd: string): 
   };
   const insertAt = Math.min(1, project.scenes.length);
   project.scenes.splice(insertAt, 0, captureScene);
-  // Re-id everything after the splice so ids stay monotonic.
-  project.scenes = project.scenes.map((s, i) => ({
-    ...s,
-    id: `scene-${String(i + 1).padStart(2, '0')}`,
-  }));
   await saveProject(dir, project);
   await ensureHyperframesScaffold(project, dir);
   log(color.dim(`        ${project.scenes.length} scene(s), ${(totalDurationMs(project) / 1000).toFixed(1)}s total`));
