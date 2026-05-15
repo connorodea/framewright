@@ -11,6 +11,7 @@ import {
   headlessPreview,
   headlessRender,
   headlessScript,
+  headlessTemplate,
 } from './headless.js';
 
 const require = createRequire(import.meta.url);
@@ -100,6 +101,14 @@ program
   .option('--no-render', 'stop after scaffolding + capture; skip the render step')
   .action(async (url, opts) => {
     await headlessClone(url, opts, process.cwd());
+  });
+
+program
+  .command('template [name]')
+  .description('Insert a preset scene template (hook | demo | cta | outro). Omit name + --list to see all.')
+  .option('--list', 'list available templates and exit')
+  .action(async (name, opts) => {
+    await headlessTemplate(name, opts, process.cwd());
   });
 
 process.on('SIGINT', () => {
