@@ -166,6 +166,145 @@ export async function headlessAdd(kind: string, opts: AddOpts, cwd: string): Pro
   log(`${color.green('added')} ${scene.id}  ${kind}  ${(scene.durationMs / 1000).toFixed(1)}s`);
 }
 
+// ---------------------------------------------------------------- fw edit
+
+export interface EditOpts {
+  text?: string;
+  duration?: string;
+  voice?: string;
+}
+
+export async function headlessEdit(
+  sceneId: string | undefined,
+  opts: EditOpts,
+  cwd: string,
+): Promise<void> {
+  const { dir, project } = await resolveProject(cwd);
+  if (project.scenes.length === 0) die('no scenes to edit');
+  if (!sceneId) {
+    const ids = project.scenes.map((s) => s.id).join(', ');
+    die(`scene id required. valid: ${ids}`);
+  }
+  const scene = project.scenes.find((s) => s.id === sceneId);
+  if (!scene) {
+    const ids = project.scenes.map((s) => s.id).join(', ');
+    die(`scene "${sceneId}" not found. valid: ${ids}`);
+  }
+  if (opts.text === undefined && opts.duration === undefined && opts.voice === undefined) {
+    die('at least one of --text, --duration, --voice required');
+  }
+
+  if (opts.text !== undefined) {
+    if (scene.kind === 'custom') {
+      scene.notes = opts.text;
+    } else {
+      scene.text = opts.text;
+    }
+  }
+  if (opts.duration !== undefined) {
+    const sec = Number(opts.duration);
+    if (!Number.isFinite(sec) || sec <= 0) die('--duration must be a positive number');
+    scene.durationMs = Math.round(sec * 1000);
+  }
+  if (opts.voice !== undefined) {
+    if (scene.kind !== 'voiceover') {
+      die(`--voice only valid for voiceover scenes (scene ${scene.id} is ${scene.kind})`);
+    }
+    scene.voice = opts.voice || undefined;
+  }
+
+  await saveProject(dir, project);
+  await ensureHyperframesScaffold(project, dir);
+  log(`${color.green('updated')} ${scene.id}`);
+}
+
+// ---------------------------------------------------------------- fw reorder
+
+export interface ReorderOpts {
+  position?: string;
+  up?: boolean;
+  down?: boolean;
+}
+
+export async function headlessReorder(
+  sceneId: string | undefined,
+  opts: ReorderOpts,
+  cwd: string,
+): Promise<void> {
+  const { dir, project } = await resolveProject(cwd);
+  if (project.scenes.length < 2) die('need at least two scenes to reorder');
+  if (!sceneId) {
+    const ids = project.scenes.map((s) => s.id).join(', ');
+    die(`scene id required. valid: ${ids}`);
+  }
+  const fromIdx = project.scenes.findIndex((s) => s.id === sceneId);
+  if (fromIdx < 0) {
+    const ids = project.scenes.map((s) => s.id).join(', ');
+    die(`scene "${sceneId}" not found. valid: ${ids}`);
+  }
+
+  const directives = [opts.position !== undefined, !!opts.up, !!opts.down].filter(Boolean).length;
+  if (directives === 0) die('one of --position, --up, --down required');
+  if (directives > 1) die('use only one of --position, --up, --down');
+
+  let toIdx: number;
+  if (opts.up) {
+    if (fromIdx === 0) die(`${sceneId} is already at the top`);
+    toIdx = fromIdx - 1;
+  } else if (opts.down) {
+    if (fromIdx === project.scenes.length - 1) die(`${sceneId} is already at the bottom`);
+    toIdx = fromIdx + 1;
+  } else {
+    const pos = Number(opts.position);
+    if (!Number.isInteger(pos) || pos < 1 || pos > project.scenes.length) {
+      die(`--position must be 1-${project.scenes.length}`);
+    }
+    toIdx = pos - 1;
+  }
+
+  if (toIdx === fromIdx) {
+    log(color.dim('no change'));
+    return;
+  }
+
+  const [moved] = project.scenes.splice(fromIdx, 1);
+  if (!moved) die('internal: scene vanished');
+  project.scenes.splice(toIdx, 0, moved);
+  project.scenes = project.scenes.map((s, i) => ({
+    ...s,
+    id: `scene-${String(i + 1).padStart(2, '0')}`,
+  }));
+
+  await saveProject(dir, project);
+  await ensureHyperframesScaffold(project, dir);
+  log(`${color.green('reordered')} → position ${toIdx + 1} is now ${project.scenes[toIdx]!.id}`);
+}
+
+// ---------------------------------------------------------------- fw duplicate
+
+export async function headlessDuplicate(
+  sceneId: string | undefined,
+  cwd: string,
+): Promise<void> {
+  const { dir, project } = await resolveProject(cwd);
+  if (project.scenes.length === 0) die('no scenes to duplicate');
+  if (!sceneId) {
+    const ids = project.scenes.map((s) => s.id).join(', ');
+    die(`scene id required. valid: ${ids}`);
+  }
+  const source = project.scenes.find((s) => s.id === sceneId);
+  if (!source) {
+    const ids = project.scenes.map((s) => s.id).join(', ');
+    die(`scene "${sceneId}" not found. valid: ${ids}`);
+  }
+
+  const clone: Scene = { ...source, id: nextSceneId(project) };
+  project.scenes.push(clone);
+  await saveProject(dir, project);
+  await ensureHyperframesScaffold(project, dir);
+  log(`${color.green('duplicated')} ${source.id} → ${clone.id}`);
+}
+
 // ---------------------------------------------------------------- fw script
 
 export interface ScriptOpts {
