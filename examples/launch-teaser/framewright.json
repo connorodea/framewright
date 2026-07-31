@@ -1,0 +1,52 @@
+{
+  "name": "Launch teaser",
+  "slug": "launch-teaser",
+  "createdAt": "2026-05-14T00:00:00.000Z",
+  "width": 1080,
+  "height": 1920,
+  "fps": 30,
+  "scenes": [
+    {
+      "id": "scene-01",
+      "kind": "title",
+      "text": "We shipped it.",
+      "durationMs": 2500
+    },
+    {
+      "id": "scene-02",
+      "kind": "caption",
+      "text": "Eighteen months. One stubborn idea.",
+      "durationMs": 3000
+    },
+    {
+      "id": "scene-03",
+      "kind": "voiceover",
+      "text": "Every founder I know was duct-taping the same three tools together. So we built the thing that should have existed all along.",
+      "durationMs": 5500
+    },
+    {
+      "id": "scene-04",
+      "kind": "caption",
+      "text": "No demos. No sales calls. No \"book a meeting.\"",
+      "durationMs": 3500
+    },
+    {
+      "id": "scene-05",
+      "kind": "voiceover",
+      "text": "You sign up, you paste your domain, and ninety seconds later you have something worth showing your team.",
+      "durationMs": 5500
+    },
+    {
+      "id": "scene-06",
+      "kind": "title",
+      "text": "Free until it isn't.",
+      "durationMs": 2500
+    },
+    {
+      "id": "scene-07",
+      "kind": "caption",
+      "text": "Try it → aiwholesail.com",
+      "durationMs": 3000
+    }
+  ]
+}

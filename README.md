@@ -63,6 +63,10 @@ Optional env overrides (copy `.env.example` → `.env` if you want them):
 
 ## Usage
 
+> New to framewright? The [`examples/`](./examples) directory has three
+> ready-to-render starter projects — a vertical launch teaser, a landscape B2B
+> explainer, and a square dev-humor meme. Copy one, change the words, render.
+
 ### Interactive mode (default)
 
 ```bash
